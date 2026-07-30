@@ -1,9 +1,3 @@
-require('dotenv').config();
-console.log('📧 EMAIL_USER:', process.env.EMAIL_USER);
-console.log('📧 EMAIL_PASS:', process.env.EMAIL_PASS ? '✅ Set' : '❌ Missing');
-console.log('📧 MONGO_URI:', process.env.MONGO_URI ? '✅ Set' : '❌ Missing');
-
-
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -28,19 +22,19 @@ app.get('/', (req, res) => {
 const Order = require('./models/Order');
 const nodemailer = require('nodemailer');
 
-// ✅ FIXED: Using environment variables for email credentials
+// ✅ HARDCODED EMAIL CREDENTIALS (Render fix)
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: process.env.EMAIL_USER || 'malcolmtechspace@gmail.com',
-        pass: process.env.EMAIL_PASS || 'ddnlcjxloujncnpg'
+        user: 'malcolmtechspace@gmail.com',
+        pass: 'ddnlcjxloujncnpg'
     }
 });
 
 const sendOrderCompleteEmail = async (order) => {
     try {
         const info = await transporter.sendMail({
-            from: `"Laundrify" <${process.env.EMAIL_USER || 'malcolmtechspace@gmail.com'}>`,
+            from: '"Laundrify" <malcolmtechspace@gmail.com>',
             to: order.customerEmail,
             subject: `Order #${order._id.toString().slice(-4)} - Ready for Pickup`,
             html: `
