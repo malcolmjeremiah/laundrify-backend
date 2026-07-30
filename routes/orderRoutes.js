@@ -79,12 +79,12 @@ router.post('/', auth, async (req, res) => {
     }
 });
 
-// ==================== UPDATE ORDER STATUS ====================
+// ==================== UPDATE ORDER STATUS (FIXED) ====================
 router.put('/:id/status', auth, adminOnly, async (req, res) => {
     try {
         const { status } = req.body;
         console.log(`📝 Updating order ${req.params.id} to status: ${status}`);
-        
+
         const updated = await Order.findByIdAndUpdate(
             req.params.id,
             {
@@ -99,7 +99,7 @@ router.put('/:id/status', auth, adminOnly, async (req, res) => {
             return res.status(404).json({ error: 'Order not found' });
         }
 
-        // ✅ SEND EMAIL WHEN COMPLETED - USING IMPORTED FUNCTION
+        // ✅ SEND EMAIL WHEN COMPLETED
         if (status === 'Completed') {
             console.log(`📧 Order ${req.params.id} completed! Sending email...`);
             await sendOrderCompleteEmail(updated);
