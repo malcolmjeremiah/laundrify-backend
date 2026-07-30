@@ -1,3 +1,9 @@
+require('dotenv').config();
+console.log('📧 EMAIL_USER:', process.env.EMAIL_USER);
+console.log('📧 EMAIL_PASS:', process.env.EMAIL_PASS ? '✅ Set' : '❌ Missing');
+console.log('📧 MONGO_URI:', process.env.MONGO_URI ? '✅ Set' : '❌ Missing');
+
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
