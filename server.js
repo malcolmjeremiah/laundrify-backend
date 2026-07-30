@@ -22,18 +22,19 @@ app.get('/', (req, res) => {
 const Order = require('./models/Order');
 const nodemailer = require('nodemailer');
 
+// ✅ FIXED: Using environment variables for email credentials
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: 'malcolmtechspace@gmail.com',
-        pass: 'ddnl cjxl oujn cnpg'
+        user: process.env.EMAIL_USER || 'malcolmtechspace@gmail.com',
+        pass: process.env.EMAIL_PASS || 'ddnlcjxloujncnpg'
     }
 });
 
 const sendOrderCompleteEmail = async (order) => {
     try {
-        await transporter.sendMail({
-            from: `"Laundrify" <malcolmtechspace@gmail.com>`,
+        const info = await transporter.sendMail({
+            from: `"Laundrify" <${process.env.EMAIL_USER || 'malcolmtechspace@gmail.com'}>`,
             to: order.customerEmail,
             subject: `Order #${order._id.toString().slice(-4)} - Ready for Pickup`,
             html: `
@@ -58,12 +59,27 @@ const sendOrderCompleteEmail = async (order) => {
                 </div>
             `
         });
-        console.log(`📧 Email sent to ${order.customerEmail}`);
+        console.log(`✅ Email sent to ${order.customerEmail} - Message ID: ${info.messageId}`);
+        return info;
     } catch (error) {
         console.error('❌ Email failed:', error.message);
+        console.error('Full error:', error);
+        return null;
     }
 };
 
+// ✅ Test email on startup
+const testEmail = async () => {
+    try {
+        await transporter.verify();
+        console.log('✅ Email transporter is ready!');
+    } catch (error) {
+        console.error('❌ Email transporter failed:', error.message);
+    }
+};
+testEmail();
+
+// Auto-complete timer
 setInterval(async () => {
     try {
         const processingOrders = await Order.find({ status: 'Processing' });
@@ -86,7 +102,7 @@ setInterval(async () => {
 // ==================== MONGODB CONNECTION ====================
 const PORT = process.env.PORT || 5000;
 
-mongoose.connect(process.env.MONGO_URI)
+mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/laundrify')
     .then(() => {
         console.log('✅ Connected to MongoDB');
         app.listen(PORT, '0.0.0.0', () => {
@@ -98,3 +114,6 @@ mongoose.connect(process.env.MONGO_URI)
     .catch(err => {
         console.error('❌ DB Connection failed:', err.message);
     });
+
+// ==================== EXPORT EMAIL FUNCTION ====================
+module.exports = { sendOrderCompleteEmail };
