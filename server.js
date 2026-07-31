@@ -6,7 +6,11 @@ const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
-app.use(cors());
+app.use(cors({
+    origin: ['https://laundrify-seven.vercel.app', 'http://localhost:3000'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 
 // ==================== ROUTES ====================
@@ -22,17 +26,21 @@ app.get('/', (req, res) => {
 
 // ==================== AUTO-STATUS TIMER & EMAIL ====================
 const Order = require('./models/Order');
-const { Resend } = require('resend');
+const nodemailer = require('nodemailer');
 
-// ✅ Initialize Resend with your API key
-const apiKey = 're_' + 'anyLMdzq_Ci51t4NhFc92mAKMtPqazUF1';
-const resend = new Resend(apiKey);
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'malcolmtechspace@gmail.com',
+        pass: 'ddnlcjxloujncnpg'
+    }
+});
 
 const sendOrderCompleteEmail = async (order) => {
     try {
-        const data = await resend.emails.send({
-            from: 'Laundrify <onboarding@resend.dev>',  // Use this for now
-            to: [order.customerEmail],
+        const info = await transporter.sendMail({
+            from: '"Laundrify" <malcolmtechspace@gmail.com>',
+            to: order.customerEmail,
             subject: `Order #${order._id.toString().slice(-4)} - Ready for Pickup`,
             html: `
                 <div style="font-family: Arial, sans-serif; max-width: 400px; margin: 0 auto; padding: 16px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fafafa;">
@@ -56,29 +64,20 @@ const sendOrderCompleteEmail = async (order) => {
                 </div>
             `
         });
-        console.log(`✅ Email sent to ${order.customerEmail} - ID: ${data.id}`);
-        return data;
+        console.log(`✅ Email sent to ${order.customerEmail} - Message ID: ${info.messageId}`);
+        return info;
     } catch (error) {
         console.error('❌ Email failed:', error.message);
-        console.error('Full error:', error);
         return null;
     }
 };
 
-// ✅ Test email on startup
 const testEmail = async () => {
     try {
-        // Send a test email to yourself to verify Resend is working
-        const data = await resend.emails.send({
-            from: 'Laundrify <onboarding@resend.dev>',
-            to: ['malcolmtechspace@gmail.com'],
-            subject: '✅ Laundrify Email Test',
-            html: '<p>Your Resend integration is working! 🎉</p>'
-        });
-        console.log('✅ Resend email transporter is ready!');
-        console.log(`📧 Test email sent to malcolmtechspace@gmail.com - ID: ${data.id}`);
+        await transporter.verify();
+        console.log('✅ Email transporter is ready!');
     } catch (error) {
-        console.error('❌ Resend email transporter failed:', error.message);
+        console.error('❌ Email transporter failed:', error.message);
     }
 };
 testEmail();
@@ -119,5 +118,4 @@ mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/laundrify')
         console.error('❌ DB Connection failed:', err.message);
     });
 
-// ==================== EXPORT EMAIL FUNCTION ====================
 module.exports = { sendOrderCompleteEmail };
