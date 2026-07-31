@@ -20,22 +20,16 @@ app.get('/', (req, res) => {
 
 // ==================== AUTO-STATUS TIMER & EMAIL ====================
 const Order = require('./models/Order');
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
-// ✅ HARDCODED EMAIL CREDENTIALS (Render fix)
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: 'malcolmtechspace@gmail.com',
-        pass: 'ddnlcjxloujncnpg'
-    }
-});
+// ✅ Initialize Resend with your API key
+const resend = new Resend(process.env.RESEND_API_KEY || 're_anyLMdzq_Ci51t4NhFc92mAKMtPqazUF1');
 
 const sendOrderCompleteEmail = async (order) => {
     try {
-        const info = await transporter.sendMail({
-            from: '"Laundrify" <malcolmtechspace@gmail.com>',
-            to: order.customerEmail,
+        const data = await resend.emails.send({
+            from: 'Laundrify <onboarding@resend.dev>',  // Use this for now
+            to: [order.customerEmail],
             subject: `Order #${order._id.toString().slice(-4)} - Ready for Pickup`,
             html: `
                 <div style="font-family: Arial, sans-serif; max-width: 400px; margin: 0 auto; padding: 16px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fafafa;">
@@ -59,8 +53,8 @@ const sendOrderCompleteEmail = async (order) => {
                 </div>
             `
         });
-        console.log(`✅ Email sent to ${order.customerEmail} - Message ID: ${info.messageId}`);
-        return info;
+        console.log(`✅ Email sent to ${order.customerEmail} - ID: ${data.id}`);
+        return data;
     } catch (error) {
         console.error('❌ Email failed:', error.message);
         console.error('Full error:', error);
@@ -71,10 +65,17 @@ const sendOrderCompleteEmail = async (order) => {
 // ✅ Test email on startup
 const testEmail = async () => {
     try {
-        await transporter.verify();
-        console.log('✅ Email transporter is ready!');
+        // Send a test email to yourself to verify Resend is working
+        const data = await resend.emails.send({
+            from: 'Laundrify <onboarding@resend.dev>',
+            to: ['malcolmtechspace@gmail.com'],
+            subject: '✅ Laundrify Email Test',
+            html: '<p>Your Resend integration is working! 🎉</p>'
+        });
+        console.log('✅ Resend email transporter is ready!');
+        console.log(`📧 Test email sent to malcolmtechspace@gmail.com - ID: ${data.id}`);
     } catch (error) {
-        console.error('❌ Email transporter failed:', error.message);
+        console.error('❌ Resend email transporter failed:', error.message);
     }
 };
 testEmail();
