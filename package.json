@@ -19,5 +19,6 @@
     "mongoose": "^9.7.4",
     "nodemailer": "^9.0.3",
     "resend": "^4.0.0"
+    "form-data": "^4.0.0"
 }
 }
