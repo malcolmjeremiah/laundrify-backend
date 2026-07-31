@@ -26,7 +26,7 @@ app.get('/', (req, res) => {
 
 // ==================== AUTO-STATUS TIMER & EMAIL ====================
 const Order = require('./models/Order');
-const { sendOrderCompleteEmail } = require('./utils/sendEmail');
+const { sendOrderCompleteEmail } = require('./utils/sendEmails');
 
 // Auto-complete timer
 setInterval(async () => {
