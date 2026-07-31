@@ -4,7 +4,7 @@ const Order = require('../models/Order');
 const { auth, adminOnly } = require('../middleware/auth');
 
 // ✅ IMPORT EMAIL FUNCTION FROM SERVER.JS
-const { sendOrderCompleteEmail } = require('../utils/sendEmail');
+const { sendOrderCompleteEmail } = require('../utils/sendEmails');
 
 // ==================== GET ALL ORDERS ====================
 router.get('/', auth, adminOnly, async (req, res) => {
