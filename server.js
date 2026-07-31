@@ -23,7 +23,7 @@ const Order = require('./models/Order');
 const { Resend } = require('resend');
 
 // ✅ Initialize Resend with your API key
-const resend = new Resend(process.env.RESEND_API_KEY || 're_anyLMdzq_Ci51t4NhFc92mAKMtPqazUF1');
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const sendOrderCompleteEmail = async (order) => {
     try {
