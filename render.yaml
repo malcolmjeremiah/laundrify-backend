@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: laundrify-backend
+    env: node
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: MONGO_URI
+        value: mongodb+srv://admin:laundrify123@laundrify.wgpxok9.mongodb.net/laundrify
+      - key: PORT
+        value: 5000
+      - key: JWT_SECRET
+        value: laundrify-super-secret-key
+      - key: EMAIL_USER
+        value: malcolmtechspace@gmail.com
+      - key: EMAIL_PASS
+        value: ddnlcjxloujncnpg
+      - key: RESEND_API_KEY
+        value: re_anyLMdzq_Ci51t4NhFc92mAKMtPqazUF1
