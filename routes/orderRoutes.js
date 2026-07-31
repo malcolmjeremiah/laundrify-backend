@@ -2,51 +2,9 @@ const express = require('express');
 const router = express.Router();
 const Order = require('../models/Order');
 const { auth, adminOnly } = require('../middleware/auth');
-const nodemailer = require('nodemailer');
 
-// ==================== EMAIL TRANSPORTER ====================
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: 'malcolmtechspace@gmail.com',
-        pass: 'ddnl cjxl oujn cnpg'
-    }
-});
-
-// ==================== SEND EMAIL HELPER ====================
-const sendOrderCompleteEmail = async (order) => {
-    try {
-        await transporter.sendMail({
-            from: `"Laundrify" <malcolmtechspace@gmail.com>`,
-            to: order.customerEmail,
-            subject: `Order #${order._id.toString().slice(-4)} - Ready for Pickup`,
-            html: `
-                <div style="font-family: Arial, sans-serif; max-width: 400px; margin: 0 auto; padding: 16px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fafafa;">
-                    <div style="text-align: center; padding-bottom: 10px; border-bottom: 2px solid #7c3aed;">
-                        <span style="font-size: 18px; font-weight: 700; color: #7c3aed;">Laundrify</span>
-                    </div>
-                    <div style="padding: 12px 0;">
-                        <p style="color: #0f172a; font-size: 14px; margin: 0 0 6px 0;">Hello ${order.customerName},</p>
-                        <p style="color: #475569; font-size: 13px; margin: 0 0 10px 0;">Your order is ready for pickup.</p>
-                        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 12px; margin-bottom: 10px;">
-                            <p style="margin: 2px 0; color: #0f172a; font-size: 12px;"><strong>Order:</strong> #${order._id.toString().slice(-4)}</p>
-                            <p style="margin: 2px 0; color: #0f172a; font-size: 12px;"><strong>Service:</strong> ${order.service}</p>
-                            <p style="margin: 2px 0; color: #0f172a; font-size: 12px;"><strong>Weight:</strong> ${order.weight || 0} kg</p>
-                            <p style="margin: 2px 0; color: #0f172a; font-size: 12px;"><strong>Price:</strong> RM${order.price || 0}</p>
-                        </div>
-                        <p style="color: #94a3b8; font-size: 11px; margin: 0;">Thank you for choosing Laundrify.</p>
-                    </div>
-                    <div style="text-align: center; padding-top: 8px; border-top: 1px solid #e2e8f0; font-size: 10px; color: #94a3b8;">
-                        <p style="margin: 0;">Automated message. Do not reply.</p>
-                    </div>
-                </div>
-            `
-        });
-        console.log(`📧 Email sent to ${order.customerEmail}`);
-    } catch (error) {
-        console.error('❌ Email failed:', error.message);
-    }
-};
+// ✅ IMPORT EMAIL FUNCTION FROM SERVER.JS
+const { sendOrderCompleteEmail } = require('../utils/sendEmail');
 
 // ==================== GET ALL ORDERS ====================
 router.get('/', auth, adminOnly, async (req, res) => {
@@ -84,7 +42,7 @@ router.post('/', auth, async (req, res) => {
             specialInstructions,
             priority,
             estimatedTime,
-            price  // ✅ RECEIVE THE PRICE FROM FRONTEND
+            price
         } = req.body;
 
         if (!service || service.trim() === '') {
@@ -101,7 +59,7 @@ router.post('/', auth, async (req, res) => {
             includeFolding: includeFolding || false,
             specialInstructions: specialInstructions || '',
             priority: priority || 'Medium',
-            price: price || 10,  // ✅ USE THE CALCULATED PRICE
+            price: price || 10,
             estimatedTime: estimatedTime || 30,
             userId: req.user._id,
             customerName: req.user.name,
@@ -121,10 +79,12 @@ router.post('/', auth, async (req, res) => {
     }
 });
 
-// ==================== UPDATE ORDER STATUS ====================
+// ==================== UPDATE ORDER STATUS (FIXED) ====================
 router.put('/:id/status', auth, adminOnly, async (req, res) => {
     try {
         const { status } = req.body;
+        console.log(`📝 Updating order ${req.params.id} to status: ${status}`);
+
         const updated = await Order.findByIdAndUpdate(
             req.params.id,
             {
@@ -139,7 +99,9 @@ router.put('/:id/status', auth, adminOnly, async (req, res) => {
             return res.status(404).json({ error: 'Order not found' });
         }
 
+        // ✅ SEND EMAIL WHEN COMPLETED
         if (status === 'Completed') {
+            console.log(`📧 Order ${req.params.id} completed! Sending email...`);
             await sendOrderCompleteEmail(updated);
         }
 
