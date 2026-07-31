@@ -1,16 +1,20 @@
 async function sendOrderCompleteEmail(order) {
     try {
-        const response = await fetch('https://api.resend.com/emails', {
+        const response = await fetch('https://api.brevo.com/v3/smtp/email', {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+                'api-key': process.env.BREVO_API_KEY,
                 'Content-Type': 'application/json',
+                'Accept': 'application/json',
             },
             body: JSON.stringify({
-                from: process.env.FROM_EMAIL,
-                to: [order.customerEmail],
+                sender: {
+                    name: process.env.FROM_NAME || 'Laundrify',
+                    email: process.env.FROM_EMAIL,
+                },
+                to: [{ email: order.customerEmail, name: order.customerName }],
                 subject: `Order #${order._id.toString().slice(-4)} - Ready for Pickup`,
-                html: `
+                htmlContent: `
                     <div style="font-family: Arial, sans-serif; max-width: 400px; margin: 0 auto; padding: 16px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fafafa;">
                         <div style="text-align: center; padding-bottom: 10px; border-bottom: 2px solid #7c3aed;">
                             <span style="font-size: 18px; font-weight: 700; color: #7c3aed;">Laundrify</span>
@@ -38,7 +42,7 @@ async function sendOrderCompleteEmail(order) {
             return { success: false, error: data };
         }
 
-        console.log(`✅ Email sent to ${order.customerEmail} - ID: ${data.id}`);
+        console.log(`✅ Email sent to ${order.customerEmail} - ID: ${data.messageId}`);
         return { success: true, data };
     } catch (error) {
         console.error('❌ Email failed:', error.message);
