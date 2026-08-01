@@ -3,7 +3,6 @@ const router = express.Router();
 const Staff = require('../models/Staff');
 const { auth, adminOnly } = require('../middleware/auth');
 
-// ==================== GET ALL STAFF ====================
 router.get('/', auth, adminOnly, async (req, res) => {
     try {
         const staff = await Staff.find()
@@ -16,7 +15,6 @@ router.get('/', auth, adminOnly, async (req, res) => {
     }
 });
 
-// ==================== GET ACTIVE STAFF ====================
 router.get('/active', auth, adminOnly, async (req, res) => {
     try {
         const staff = await Staff.find({ isActive: true })
@@ -29,22 +27,18 @@ router.get('/active', auth, adminOnly, async (req, res) => {
     }
 });
 
-// ==================== CREATE STAFF ====================
 router.post('/', auth, adminOnly, async (req, res) => {
     try {
         const { name, email, phone, shift, userId } = req.body;
         
-        // ✅ Email validation
         if (!email || !email.includes('@') || !email.includes('.')) {
             return res.status(400).json({ error: 'Please enter a valid email address' });
         }
         
-        // ✅ Phone number validation (only numbers, +, -, spaces, parentheses)
         if (phone && !/^[0-9+\-\s()]*$/.test(phone)) {
             return res.status(400).json({ error: 'Phone number contains invalid characters. Use only numbers, +, -, or spaces.' });
         }
         
-        // Check if staff exists
         const existing = await Staff.findOne({ email });
         if (existing) {
             return res.status(400).json({ error: 'Staff with this email already exists' });
@@ -67,17 +61,14 @@ router.post('/', auth, adminOnly, async (req, res) => {
     }
 });
 
-// ==================== UPDATE STAFF ====================
 router.put('/:id', auth, adminOnly, async (req, res) => {
     try {
         const { name, email, phone, shift, isActive } = req.body;
         
-        // ✅ Email validation
         if (email && (!email.includes('@') || !email.includes('.'))) {
             return res.status(400).json({ error: 'Please enter a valid email address' });
         }
-        
-        // ✅ Phone number validation
+
         if (phone && !/^[0-9+\-\s()]*$/.test(phone)) {
             return res.status(400).json({ error: 'Phone number contains invalid characters. Use only numbers, +, -, or spaces.' });
         }
@@ -99,7 +90,6 @@ router.put('/:id', auth, adminOnly, async (req, res) => {
     }
 });
 
-// ==================== DELETE STAFF ====================
 router.delete('/:id', auth, adminOnly, async (req, res) => {
     try {
         const deleted = await Staff.findByIdAndDelete(req.params.id);
