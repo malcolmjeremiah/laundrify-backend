@@ -34,10 +34,20 @@ router.post('/', auth, adminOnly, async (req, res) => {
     try {
         const { name, email, phone, shift, userId } = req.body;
         
+        // ✅ Email validation
+        if (!email || !email.includes('@') || !email.includes('.')) {
+            return res.status(400).json({ error: 'Please enter a valid email address' });
+        }
+        
+        // ✅ Phone number validation (only numbers, +, -, spaces, parentheses)
+        if (phone && !/^[0-9+\-\s()]*$/.test(phone)) {
+            return res.status(400).json({ error: 'Phone number contains invalid characters. Use only numbers, +, -, or spaces.' });
+        }
+        
         // Check if staff exists
         const existing = await Staff.findOne({ email });
         if (existing) {
-            return res.status(400).json({ error: 'Staff already exists' });
+            return res.status(400).json({ error: 'Staff with this email already exists' });
         }
         
         const staff = new Staff({
@@ -61,6 +71,16 @@ router.post('/', auth, adminOnly, async (req, res) => {
 router.put('/:id', auth, adminOnly, async (req, res) => {
     try {
         const { name, email, phone, shift, isActive } = req.body;
+        
+        // ✅ Email validation
+        if (email && (!email.includes('@') || !email.includes('.'))) {
+            return res.status(400).json({ error: 'Please enter a valid email address' });
+        }
+        
+        // ✅ Phone number validation
+        if (phone && !/^[0-9+\-\s()]*$/.test(phone)) {
+            return res.status(400).json({ error: 'Phone number contains invalid characters. Use only numbers, +, -, or spaces.' });
+        }
         
         const updated = await Staff.findByIdAndUpdate(
             req.params.id,
