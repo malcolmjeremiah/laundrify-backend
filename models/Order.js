@@ -4,7 +4,7 @@ const OrderSchema = new mongoose.Schema({
     customerName: { type: String, required: true },
     customerEmail: { type: String, required: true },
     
-    // ============ ORDER DETAILS ============
+    // ============ order details ============
     service: { type: String, required: true },
     clothesType: { 
         type: String, 
@@ -22,7 +22,7 @@ const OrderSchema = new mongoose.Schema({
     includeFolding: { type: Boolean, default: false },
     specialInstructions: { type: String, default: '' },
     
-    // ============ PRICING ============
+    // ============ price ============
     price: { type: Number, default: 0 },
     priceBreakdown: {
         basePrice: { type: Number, default: 0 },
@@ -33,7 +33,7 @@ const OrderSchema = new mongoose.Schema({
         total: { type: Number, default: 0 }
     },
     
-    // ============ STATUS ============
+    // ============ status ============
     status: { 
         type: String, 
         enum: ['Pending', 'Processing', 'Completed', 'Ready', 'Picked Up'], 
@@ -42,7 +42,7 @@ const OrderSchema = new mongoose.Schema({
     priority: { type: String, enum: ['Low', 'Medium', 'High'], default: 'Medium' },
     estimatedTime: { type: Number, default: 30 }, // in minutes
     
-    // ============ PAYMENT ============
+    // ============ payment ============
     paymentStatus: { 
         type: String, 
         enum: ['Unpaid', 'Paid', 'Partial'], 
@@ -55,15 +55,15 @@ const OrderSchema = new mongoose.Schema({
     },
     paymentDate: Date,
     
-    // ============ ASSIGNMENT ============
+    // ============ assignment ============
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
     
-    // ============ FEEDBACK ============
+    // ============ feedback ============
     feedback: { type: Number, min: 1, max: 5 },
     feedbackComment: String,
     
-    // ============ TIMESTAMPS ============
+    // ============ timestamps ============
     completedAt: Date,
     pickedUpAt: Date,
     notes: String,
