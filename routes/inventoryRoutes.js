@@ -3,7 +3,6 @@ const router = express.Router();
 const Inventory = require('../models/Inventory');
 const { auth, adminOnly } = require('../middleware/auth');
 
-// Get all inventory (Admin only)
 router.get('/', auth, adminOnly, async (req, res) => {
     try {
         const inventory = await Inventory.find().sort({ category: 1, name: 1 });
@@ -13,7 +12,6 @@ router.get('/', auth, adminOnly, async (req, res) => {
     }
 });
 
-// Get low stock items (Admin only)
 router.get('/low-stock', auth, adminOnly, async (req, res) => {
     try {
         const lowStock = await Inventory.find({
@@ -25,7 +23,6 @@ router.get('/low-stock', auth, adminOnly, async (req, res) => {
     }
 });
 
-// Create inventory item (Admin only)
 router.post('/', auth, adminOnly, async (req, res) => {
     try {
         const { name, quantity, unit, minQuantity, category } = req.body;
@@ -51,7 +48,6 @@ router.post('/', auth, adminOnly, async (req, res) => {
     }
 });
 
-// Update inventory (Admin only)
 router.put('/:id', auth, adminOnly, async (req, res) => {
     try {
         const { quantity, minQuantity, name, unit, category } = req.body;
@@ -80,7 +76,6 @@ router.put('/:id', auth, adminOnly, async (req, res) => {
     }
 });
 
-// Update quantity only (Admin only)
 router.patch('/:id/quantity', auth, adminOnly, async (req, res) => {
     try {
         const { quantity } = req.body;
@@ -102,7 +97,6 @@ router.patch('/:id/quantity', auth, adminOnly, async (req, res) => {
     }
 });
 
-// Delete inventory (Admin only)
 router.delete('/:id', auth, adminOnly, async (req, res) => {
     try {
         const deleted = await Inventory.findByIdAndDelete(req.params.id);
