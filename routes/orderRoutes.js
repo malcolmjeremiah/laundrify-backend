@@ -3,10 +3,8 @@ const router = express.Router();
 const Order = require('../models/Order');
 const { auth, adminOnly } = require('../middleware/auth');
 
-// ✅ IMPORT EMAIL FUNCTION FROM SERVER.JS
 const { sendOrderCompleteEmail } = require('../utils/sendEmails');
 
-// ==================== GET ALL ORDERS ====================
 router.get('/', auth, adminOnly, async (req, res) => {
     try {
         const orders = await Order.find().sort({ createdAt: -1 });
@@ -17,7 +15,6 @@ router.get('/', auth, adminOnly, async (req, res) => {
     }
 });
 
-// ==================== GET USER'S ORDERS ====================
 router.get('/my-orders', auth, async (req, res) => {
     try {
         const orders = await Order.find({ userId: req.user._id }).sort({ createdAt: -1 });
@@ -28,7 +25,6 @@ router.get('/my-orders', auth, async (req, res) => {
     }
 });
 
-// ==================== CREATE ORDER ====================
 router.post('/', auth, async (req, res) => {
     try {
         const {
@@ -79,7 +75,6 @@ router.post('/', auth, async (req, res) => {
     }
 });
 
-// ==================== UPDATE ORDER STATUS (FIXED) ====================
 router.put('/:id/status', auth, adminOnly, async (req, res) => {
     try {
         const { status } = req.body;
@@ -99,7 +94,6 @@ router.put('/:id/status', auth, adminOnly, async (req, res) => {
             return res.status(404).json({ error: 'Order not found' });
         }
 
-        // ✅ SEND EMAIL WHEN COMPLETED
         if (status === 'Completed') {
             console.log(`📧 Order ${req.params.id} completed! Sending email...`);
             await sendOrderCompleteEmail(updated);
@@ -112,7 +106,6 @@ router.put('/:id/status', auth, adminOnly, async (req, res) => {
     }
 });
 
-// ==================== MARK ORDER AS PAID ====================
 router.put('/:id/pay', auth, async (req, res) => {
     try {
         console.log('💰 PAYMENT ENDPOINT HIT!');
@@ -150,7 +143,6 @@ router.put('/:id/pay', auth, async (req, res) => {
     }
 });
 
-// ==================== SUBMIT FEEDBACK ====================
 router.post('/:id/feedback', auth, async (req, res) => {
     try {
         const { rating, comment } = req.body;
@@ -187,7 +179,6 @@ router.post('/:id/feedback', auth, async (req, res) => {
     }
 });
 
-// ==================== GET ORDER STATISTICS ====================
 router.get('/stats', auth, adminOnly, async (req, res) => {
     try {
         const total = await Order.countDocuments();
@@ -245,7 +236,6 @@ router.get('/stats', auth, adminOnly, async (req, res) => {
     }
 });
 
-// ==================== EXPORT ORDERS AS CSV ====================
 router.get('/export/csv', auth, adminOnly, async (req, res) => {
     try {
         const orders = await Order.find().sort({ createdAt: -1 });
@@ -272,7 +262,6 @@ router.get('/export/csv', auth, adminOnly, async (req, res) => {
     }
 });
 
-// ==================== DELETE ORDER ====================
 router.delete('/:id', auth, adminOnly, async (req, res) => {
     try {
         const deleted = await Order.findByIdAndDelete(req.params.id);
