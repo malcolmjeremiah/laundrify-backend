@@ -45,6 +45,37 @@ router.post('/', auth, async (req, res) => {
             return res.status(400).json({ error: 'Service name is required' });
         }
 
+        let calculatedPrice = 10;
+        
+        const weightNum = parseFloat(weight) || 0;
+        calculatedPrice += weightNum * 1.5;
+        
+        if (includeDryer) calculatedPrice += 8;
+        if (includeIroning) calculatedPrice += 10;
+        if (includeFolding) calculatedPrice += 5;
+        
+        if (priority === 'Medium') calculatedPrice += 5;
+        if (priority === 'High') calculatedPrice += 10;
+        
+        switch(clothesType) {
+            case 'Delicate': calculatedPrice += 5; break;
+            case 'Silk': calculatedPrice += 8; break;
+            case 'Wool': calculatedPrice += 5; break;
+            case 'Blankets': calculatedPrice += 12; break;
+            case 'Heavy': calculatedPrice += 4; break;
+            default: break;
+        }
+        
+        switch(washStyle) {
+            case 'Heavy Duty': calculatedPrice += 5; break;
+            case 'Hand Wash': calculatedPrice += 8; break;
+            case 'Delicate': calculatedPrice += 4; break;
+            case 'Eco': calculatedPrice += 2; break;
+            default: break;
+        }
+
+        const finalPrice = (price && price > 0) ? price : Math.round(calculatedPrice * 100) / 100;
+
         const order = new Order({
             service: service.trim(),
             clothesType: clothesType || 'Regular',
@@ -55,7 +86,7 @@ router.post('/', auth, async (req, res) => {
             includeFolding: includeFolding || false,
             specialInstructions: specialInstructions || '',
             priority: priority || 'Medium',
-            price: price || 10,
+            price: finalPrice,
             estimatedTime: estimatedTime || 30,
             userId: req.user._id,
             customerName: req.user.name,
