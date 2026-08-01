@@ -30,7 +30,7 @@ const UserSchema = new mongoose.Schema({
     }
 });
 
-// ============ FIXED: NO next() ISSUE ============
+
 UserSchema.pre('save', function() {
     const user = this;
     
@@ -42,12 +42,11 @@ UserSchema.pre('save', function() {
     user.password = bcrypt.hashSync(user.password, salt);
 });
 
-// ============ COMPARE PASSWORD ============
+
 UserSchema.methods.comparePassword = function(candidatePassword) {
     return bcrypt.compareSync(candidatePassword, this.password);
 };
 
-// ============ REMOVE PASSWORD FROM JSON ============
 UserSchema.methods.toJSON = function() {
     const user = this.toObject();
     delete user.password;
