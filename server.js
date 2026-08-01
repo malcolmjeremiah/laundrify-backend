@@ -9,26 +9,21 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ==================== DEBUG: CONFIRM ENV VARS LOADED ====================
 console.log('RESEND KEY LOADED:', process.env.RESEND_API_KEY ? 'YES ✅' : 'NO ❌ - MISSING');
 console.log('FROM EMAIL:', process.env.FROM_EMAIL || 'MISSING ❌');
 
-// ==================== ROUTES ====================
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/orders', require('./routes/orderRoutes'));
 app.use('/api/inventory', require('./routes/inventoryRoutes'));
 app.use('/api/staff', require('./routes/staffRoutes'));
 
-// ==================== TEST ROUTE ====================
 app.get('/', (req, res) => {
     res.json({ message: 'Laundrify API is running!' });
 });
 
-// ==================== AUTO-STATUS TIMER & EMAIL ====================
 const Order = require('./models/Order');
 const { sendOrderCompleteEmail } = require('./utils/sendEmails');
 
-// Auto-complete timer
 setInterval(async () => {
     try {
         const processingOrders = await Order.find({ status: 'Processing' });
@@ -48,7 +43,6 @@ setInterval(async () => {
     }
 }, 10000);
 
-// ==================== MONGODB CONNECTION ====================
 const PORT = process.env.PORT || 5000;
 
 mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/laundrify')
