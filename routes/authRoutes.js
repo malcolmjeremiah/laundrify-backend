@@ -3,7 +3,7 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-// ==================== REGISTER ====================
+
 router.post('/register', async (req, res) => {
     try {
         const { name, email, password, role } = req.body;
@@ -13,7 +13,6 @@ router.post('/register', async (req, res) => {
             return res.status(400).json({ error: 'Email already registered' });
         }
         
-        // ✅ FIX: Only admin@laundrify.com can be admin
         let assignedRole = 'customer';
         if (email === 'admin@laundrify.com') {
             assignedRole = 'admin';
@@ -47,7 +46,6 @@ router.post('/register', async (req, res) => {
     }
 });
 
-// ==================== LOGIN ====================
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -82,7 +80,6 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// ==================== GET CURRENT USER ====================
 router.get('/me', async (req, res) => {
     try {
         const token = req.header('Authorization')?.replace('Bearer ', '');
@@ -104,7 +101,6 @@ router.get('/me', async (req, res) => {
     }
 });
 
-// ==================== UPDATE PROFILE ====================
 router.put('/profile', async (req, res) => {
     try {
         const token = req.header('Authorization')?.replace('Bearer ', '');
