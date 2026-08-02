@@ -146,13 +146,10 @@ router.put('/:id/pay', auth, async (req, res) => {
 
         const { paymentMethod } = req.body;
 
-        const order = await Order.findOne({
-            _id: req.params.id,
-            $or: [
-                { userId: req.user._id },
-                { userId: { $exists: true } }
-            ]
-        });
+       const order = await Order.findOne({
+    _id: req.params.id,
+    userId: req.user._id
+});
 
         if (!order) {
             console.log('❌ Order not found');
